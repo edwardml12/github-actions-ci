@@ -23,7 +23,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Start stack (detached)
-        run: docker compose up -d --wait --wait-timeout 10
+        run: docker compose up -d --wait
       - name: Create table in localstack
         run: python infra/setup_localstack.py
       - name: List tables in localstack
