@@ -19,5 +19,5 @@ def create_table(endpoint_url="http://localhost:4566", table_name="calculator"):
             BillingMode="PAY_PER_REQUEST",
         )
         print(f"Tabela '{table_name}' criada com sucesso!")
-    except dynamodb.exceptions.ResourceInUseException:
-        print(f"Tabela '{table_name}' já existe.")
+    except Exception as e:
+        print(e)

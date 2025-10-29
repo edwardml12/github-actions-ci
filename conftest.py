@@ -10,19 +10,19 @@ LOCALSTACK_HOST = "localhost"
 
 
 def wait_for_port(host: str, port: int, timeout: int = 30):
-    """Aguarda até que o LocalStack esteja pronto para conexões."""
+    """Waiting for LocalStack to be ready on the specified port."""
     start_time = time.time()
     while True:
         try:
             with socket.create_connection((host, port), timeout=2):
-                print(f"✅ LocalStack está respondendo em {host}:{port}")
+                print(f"✅ LocalStack is ready on {host}:{port}")
                 return True
         except OSError:
             if time.time() - start_time >= timeout:
                 raise TimeoutError(
-                    f"⏰ Timeout: LocalStack não respondeu na porta {port} em {timeout}s"
+                    f"⏰ Timeout: LocalStack ins't ready on port {port} in {timeout}s"
                 )
-            print("⏳ Aguardando LocalStack iniciar...")
+            print("⏳ Waiting for LocalStack to be ready...")
             time.sleep(2)
 
 
@@ -30,23 +30,19 @@ def wait_for_port(host: str, port: int, timeout: int = 30):
 def setup_localstack_environment():
     if(os.getenv("GITHUB_ACTIONS") is True):
         return
-    """Sobe o LocalStack e prepara o ambiente de testes."""
-    # print("\n🚀 Subindo LocalStack via docker compose...")
+    print("\n🚀 Starting LocalStack with docker compose")
     subprocess.run(["docker", "compose", "up", "-d"], check=True)
 
-    # Aguarda o LocalStack estar pronto
     wait_for_port(LOCALSTACK_HOST, LOCALSTACK_PORT)
 
-    # Roda o setup de tabelas e seed
-    print("⚙️ Configurando tabelas e seed no LocalStack...")
+    print("⚙️ Creating DynamoDB table...")
     current_dir = Path(__file__).parent.resolve()
     setup_script = current_dir / "infra" / "setup_localstack.py"
-    # infra/setup_localstack.py
     subprocess.run(["python3", str(setup_script)], check=True)
 
-    print("✅ Ambiente LocalStack configurado com sucesso!\n")
+    print("✅ LocalStack is ready!\n")
     yield
 
     # Após os testes, encerra o LocalStack
-    print("\n🧹 Finalizando LocalStack...")
+    print("\n🧹 Teardown LocalStack...")
     subprocess.run(["docker", "compose", "down"], check=True)
