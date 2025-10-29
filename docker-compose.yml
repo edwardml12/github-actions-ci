@@ -1,0 +1,24 @@
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - '4566:4566' # LocalStack Gateway (principal)
+    environment:
+      SERVICES: >-
+        lambda,
+        dynamodb
+      DEBUG: 1
+      DATA_DIR: /var/lib/localstack/data
+      LAMBDA_EXECUTOR: docker-reuse # executa Lambdas em contêineres separados
+      LAMBDA_REMOVE_CONTAINERS: 1 # remove contêineres após execução
+      AWS_DEFAULT_REGION: sa-east-1
+    volumes:
+      - './.localstack:/var/lib/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    driver: bridge
