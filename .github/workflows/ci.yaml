@@ -6,7 +6,7 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
-      AWS_REGION: sa-east-1        # or us-east-1; must match your code
+      AWS_REGION: sa-east-1
       AWS_DEFAULT_REGION: sa-east-1
       AWS_EC2_METADATA_DISABLED: "true"  # speeds up boto3/no IMDS calls
     steps:
@@ -25,7 +25,7 @@ jobs:
       - name: Start stack (detached)
         run: docker compose up -d --wait --wait-timeout 10
       - name: Create table in localstack
-        run: python infra/create_table.py
+        run: python infra/setup_localstack.py
       - name: List tables in localstack
         run: aws dynamodb list-tables --endpoint-url=http://localhost:4566
       - name: Run tests
