@@ -26,6 +26,8 @@ jobs:
         run: docker compose -f docker-compose.yml up -d
       - name: create table in localstack
         run: python infra/create_table.py
+      - name: list tables in localstack
+        run: aws dynamodb list-tables --endpoint-url=http://localhost:4566
       - name: Run tests
         run: pytest -v -s
       - name: Teardown
