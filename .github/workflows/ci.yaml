@@ -16,5 +16,24 @@ jobs:
         run: pip install -r requirements.txt
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Start stack (detached)
+        run: docker compose -f docker-compose.yml up -d
+      - name: Wait for healthy services
+        run: |
+          for i in {1..30}; do
+            unhealthy=$(docker compose ps --format json \
+              | jq '[.[] | select(.Health!="healthy")] | length')
+            [ "$unhealthy" -eq 0 ] && echo "All services healthy ✅" && exit 0
+            echo "Waiting for health... ($i/30)"
+            sleep 3
+          done
+          echo "Some services are not healthy ❌"
+          docker compose ps
+          exit 1
+      - name: create table in localstack
+        run: python infra/create_table.py
       - name: Run tests
-        run: pytest
+        run: pytest -v -s
+      - name: Teardown
+        if: always()
+        run: docker compose down -v --remove-orphans
